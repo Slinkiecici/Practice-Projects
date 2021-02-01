@@ -1,7 +1,7 @@
 import random
 
 def hangman_game ():
-    words = ("APPLE", "APRICOT", "GRAPE", "ORANGE")                          #List of words used to randomize option
+    words = ("APPLE", "APRICOT", "GRAPE", "ORANGE", "EAGLE")                          #List of words used to randomize option
     guesses = []
     chances = 10
     word = random.choice(words)

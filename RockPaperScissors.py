@@ -5,7 +5,7 @@ possibilities = ['R','P','S']
 comp_score = 0
 score = 0
 
-while (abs(comp_score - score) <2) or (comp_score <= 1 or score <= 1):                       #and (comp_score+score/2).is_integer()
+while (abs(comp_score - score) <2) or (comp_score <= 1 or score <= 1):                       #and (comp_score+score/2).is_integer() #THIS LINE NEEDS SO MUCH OF HELP
     move = input("Rock = R, Paper = P, Scissors = S. Give your move: ")
     comp_move = random.choice(possibilities)
     if move == "R":

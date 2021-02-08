@@ -28,3 +28,4 @@ WebScraper/credentials.txt
 file.html
 contactbook.db
 contactbook.db
+*.xlsx

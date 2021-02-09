@@ -1,6 +1,7 @@
 import random
 import wx
 import os
+from AccessSite import SiteActions
 
 class InterfaceScraper(wx.Panel):
     #----------------------------------------------------------------------
@@ -8,6 +9,7 @@ class InterfaceScraper(wx.Panel):
         """"""
         wx.Panel.__init__(self, parent=parent)
         self.SetBackgroundColour("#F5F5F5")
+        self.site_action = SiteActions()
         self.scraper_page()
     
     def scraper_page(self):
@@ -20,7 +22,7 @@ class InterfaceScraper(wx.Panel):
         heading.SetFont(font)
         success_label = wx.StaticText(self, id = 1, label = "Successfully Scraped Products", style = wx.ALIGN_CENTER)
         failed_label = wx.StaticText(self, id = 1, label = "Unsuccessful Products", style = wx.ALIGN_CENTER)
-        
+        self.file_label = wx.StaticText(self, id = 1, label = "File name will appear here", style = wx.ALIGN_CENTER)
         sizer = wx.BoxSizer(wx.VERTICAL)
         parts_processed_successful_sizer = wx.BoxSizer(wx.VERTICAL)
         parts_processed_failed_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -36,20 +38,27 @@ class InterfaceScraper(wx.Panel):
         parts_processed_sizer.Add(parts_processed_failed_sizer, 0, wx.ALL, 10)
 
         sizer.Add(parts_processed_sizer, 0, wx.ALL, 10)
-        sizer.Add(self.file_to_scrape_button, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20) 
-        self.file_to_scrape_button.Bind(wx.EVT_BUTTON, self.OnClick)
+        sizer.Add(self.file_to_scrape_button, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
+        sizer.Add(self.file_label, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)  
+        self.file_to_scrape_button.Bind(wx.EVT_BUTTON, self.on_click_file_chooser)
         self.SetSizer(sizer)
 
 
-    def OnClick(self, e): 
+    def on_click_file_chooser(self, e): 
         wildcard = "Text Files (*.xlsx)|*.xlsx" 
         dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "", wildcard, wx.FD_OPEN)
 
         if dlg.ShowModal() == wx.ID_OK:
             paths = dlg.GetPaths()
-            print ("You chose the following file(s):")
             for path in paths:
-                print (path)
+                self.file_label.SetLabel(path)
+                self.site_action.compile_list_for_scrape(path)
+                for named in self.site_action.failed:
+                    self.failed_parts.AppendText(str(named)+ "\n")
+                for named in self.site_action.success:
+                    self.successful_parts.AppendText(str(named)+ "\n")
+               
+                
         dlg.Destroy()
 
     

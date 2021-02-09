@@ -9,7 +9,8 @@ class SiteActions :
     def __init__(self):
         self.parts_list = []                                        #list created in  compile_list_to_scrape and contains part numbers from an input excel sheet downloaded from odoo
         self.excel_format = []                                      #list containing product and product info to be written to excel used in write_to_excel
-        self.failed = []                                            #shows failed product codes, intention is to display to user to edit and rerun scraper
+        self.failed = [] 
+        self.success = []                                           #shows failed product codes, intention is to display to user to edit and rerun scraper
 
     def login_site (self):
         f = open('WebScraper/credentials.txt', 'r')             #retreive log in details from seperate txt file
@@ -26,7 +27,7 @@ class SiteActions :
         g.submit()                                                                          #submits form to login
         g.setup(connect_timeout=6, timeout=6)
         #print (g.doc.body)
-        for part in self.parts_list:
+        for part in self.parts_list[30:35]:
             if (len(str(part))) < 5:
                 pass
             else:
@@ -41,6 +42,7 @@ class SiteActions :
                     f.close()
                     try:
                         self.extract_info("WebScraper/file.html")                                                       #passing temporary html file to extract_info function to pull relevant data
+                        self.success.append(str(part))
                     except:
                         self.failed.append(str(part))                                                     
                 except: 
@@ -68,20 +70,19 @@ class SiteActions :
         df1.to_excel('WebScraper/UpdatedSiemensPriceList.xlsx')                                                             #Writes dataframe to excel sheet
         print (df1)
     
-    def compile_list_for_scrape (self):                                                 
-        df = pd.read_excel (r'WebScraper/product.product.xlsx')                                                             #Reads values from odoo exported prodct list
+    def compile_list_for_scrape (self, filename):                                                 
+        df = pd.read_excel (filename)                                                             #Reads values from odoo exported prodct list
         self.parts_list = df['Internal Reference'].tolist()                                                                 #Odoo labels parts list as Internal Reference
-        self.parts_list = list(dict.fromkeys(self.parts_list))                                                              #converts list to dictionary to drop duplicates then back to list
+        self.parts_list = list(dict.fromkeys(self.parts_list))  
+        self.login_site()                                                            #converts list to dictionary to drop duplicates then back to list
 
 
 
 
 
-site_action = SiteActions()
-site_action.compile_list_for_scrape()
-site_action.login_site()
-site_action.write_to_excel()
-print (site_action.failed)
+#site_action = SiteActions()
+#site_action.login_site()
+#site_action.write_to_excel()
 
 
 

@@ -22,11 +22,15 @@ class SiteActions :
         g = Grab()
         g.setup(connect_timeout=5, timeout=5)
         g.go("https://mall.industry.siemens.com/regpublic/Login.aspx?regionkey=ZA&lang=en&app=MALL&ret=https%3a%2f%2fmall.industry.siemens.com%2fgoos%2fWelcomePage.aspx%3fregionUrl%3d%252fza")
-        g.doc.set_input("ctl00$ContentPlaceHolder1$TextSiemensLogin", login_name )          #id used on page for input field of login name
-        g.doc.set_input("ctl00$ContentPlaceHolder1$TextPassword", login_password)           #id used on page for input field of password
-        g.submit()                                                                          #submits form to login
+        print (g.doc.text_search('Logout'))
+        if g.doc.text_search('Logout') == True:
+            print ("Already Logged in")            
+        else:
+            g.doc.set_input("ctl00$ContentPlaceHolder1$TextSiemensLogin", login_name )          #id used on page for input field of login name
+            g.doc.set_input("ctl00$ContentPlaceHolder1$TextPassword", login_password)           #id used on page for input field of password
+            g.submit()
+            print ("Logged in")                                                                          #submits form to login
         g.setup(connect_timeout=6, timeout=6)
-        #print (g.doc.body)
         for part in self.parts_list[30:35]:
             if (len(str(part))) < 5:
                 pass
@@ -47,6 +51,7 @@ class SiteActions :
                         self.failed.append(str(part))                                                     
                 except: 
                     self.failed.append(str('https://mall.industry.siemens.com/mall/en/za/Catalog/Product/' +str(part)))     #if unable to correctly load page, add to failed list to be displayed
+        self.write_to_excel()
     def extract_info (self, file_name):
         #Reading html file with beautiful soup and extracting price
         with open(file_name) as fp:

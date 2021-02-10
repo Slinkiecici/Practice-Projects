@@ -51,7 +51,6 @@ class SiteActions :
                         self.failed.append(str(part))                                                     
                 except: 
                     self.failed.append(str('https://mall.industry.siemens.com/mall/en/za/Catalog/Product/' +str(part)))     #if unable to correctly load page, add to failed list to be displayed
-        self.write_to_excel()
     def extract_info (self, file_name):
         #Reading html file with beautiful soup and extracting price
         with open(file_name) as fp:
@@ -68,11 +67,11 @@ class SiteActions :
              
 
     
-    def write_to_excel (self):
+    def write_to_excel (self, filename):
         df1 = pd.DataFrame(self.excel_format)                                                                               #converts list with strings in to a dataframe to be used by panda framework
         df1.drop_duplicates()                                                                                               #Drops any instances of duplication if they made it through
         df1.columns = ["Product code", "Description", "List Price", "Customer Price"]
-        df1.to_excel('WebScraper/UpdatedSiemensPriceList.xlsx')                                                             #Writes dataframe to excel sheet
+        df1.to_excel('WebScraper/' + str(filename))                                                             #Writes dataframe to excel sheet
         print (df1)
     
     def compile_list_for_scrape (self, filename):                                                 

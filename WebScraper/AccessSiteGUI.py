@@ -22,6 +22,8 @@ class InterfaceScraper(wx.Panel):
         self.sheet_name = wx.TextCtrl(self)
         font = wx.Font(18, wx.DECORATIVE, wx.BOLD, wx.NORMAL)
         heading.SetFont(font)
+        self.scrape_outcome_label = wx.StaticText(self, label = " ")
+
         success_label = wx.StaticText(self, id = 1, label = "Successfully Scraped Products", style = wx.ALIGN_CENTER)
         failed_label = wx.StaticText(self, id = 1, label = "Unsuccessful Products", style = wx.ALIGN_CENTER)
         self.file_label = wx.StaticText(self, id = 1, label = "File name will appear here", style = wx.ALIGN_CENTER)
@@ -46,7 +48,8 @@ class InterfaceScraper(wx.Panel):
         sizer.Add(parts_processed_sizer, 0, wx.ALL, 10)
         sizer.Add(self.file_to_scrape_button, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
         sizer.Add(self.file_label, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)  
-        sizer.Add(sheet_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)  
+        sizer.Add(sheet_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
+        sizer.Add(self.scrape_outcome_label, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)   
         self.file_to_scrape_button.Bind(wx.EVT_BUTTON, self.on_click_file_chooser)
         self.SetSizer(sizer)
 
@@ -71,9 +74,12 @@ class InterfaceScraper(wx.Panel):
                     for named in self.site_action.success:
                         self.successful_parts.AppendText(str(named)+ "\n")
             self.site_action.write_to_excel(user_file_name)
+            self.scrape_outcome_label.SetLabel("Successfully scraped product details have been saved to " + str(user_file_name))
+        elif self.sheet_name_label.GetLabel() == ("PLEASE! A FILE NAME FIRST SIR!"):
+            self.sheet_name_label.SetLabel("PLEASE! YOU CAN NAME IT WHATEVER!")
         else: 
             self.sheet_name_label.SetForegroundColour(wx.Colour(255,0,0))
-            self.sheet_name_label.SetLabel("PLEASE! A FILE NAME SIR!")                
+            self.sheet_name_label.SetLabel("PLEASE! A FILE NAME FIRST SIR!")                
         dlg.Destroy()
 
 class InterfaceOdoo(wx.Panel):

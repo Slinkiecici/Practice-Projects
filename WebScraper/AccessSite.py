@@ -75,7 +75,7 @@ class SiteActions :
         print (df1)
     
     def compile_list_for_scrape (self, filename):                                                 
-        df = pd.read_excel (filename)                                                             #Reads values from odoo exported prodct list
+        df = pd.read_excel (filename)                                                             #Reads values from odoo exported product list
         self.parts_list = df['Internal Reference'].tolist()                                                                 #Odoo labels parts list as Internal Reference
         self.parts_list = list(dict.fromkeys(self.parts_list))  
         self.login_site()                                                            #converts list to dictionary to drop duplicates then back to list
@@ -84,9 +84,6 @@ class SiteActions :
 
 
 
-#site_action = SiteActions()
-#site_action.login_site()
-#site_action.write_to_excel()
 
 
 

@@ -31,3 +31,4 @@ contactbook.db
 *.xlsx
 WebScraper/__pycache__/AccessSite.cpython-38.pyc
 WebScraper/__pycache__/AccessSite.cpython-38.pyc
+WebScraper/odooCredentials.txt

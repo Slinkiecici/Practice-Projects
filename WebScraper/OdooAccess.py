@@ -20,11 +20,8 @@ common.version()
 
 uid = common.authenticate(db, username, password, {})
 models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(url))
-product_details =  (models.execute_kw(
-             db, uid, password, 'product.product', 'search_read',
-             [],{'fields': ['display_name','code', 'qty_available']}  ))
 
- #{'fields': ['product_variant_ids','is_product_variant', 'qty_available']}  {'fields': ['code','product_variant_id']}
+ 
 def Show_all_in_stock():
     product_details =  (models.execute_kw(
              db, uid, password, 'product.product', 'search_read',
@@ -56,9 +53,6 @@ def display_all():
 
 def test_create_quant_3():
     """ Try to create a quant with `inventory_quantity` but not in inventory mode.
-    Creates two quants not in inventory mode:
-        - One with `quantity` (this one must be OK)
-        - One with `inventory_quantity` (this one must be null)
     """
     valid_quant = env['stock.quant'].create({
         'product_id': 21,
@@ -74,20 +68,19 @@ def test_create_quant_3():
     self.assertEqual(invalid_quant.quantity, 0)
 
 
-def update_stock_value():
+def update_stock_value(): #THis function does naaaaaaaaaaaaaaat work yet.
     models.execute_kw(db, uid, password, 'stock.quant', 'write', [[225], {
         'inventory_quantity' : float(123.0),
     }])
-
+    product_quantity = (models.execute_kw(db, uid, password, 'stock.quant', 'write', [[165], {
+        'inventory_quantity' : float(0.0),
+        'quantity' : float(123.0),
+        'available_quantity' : float(123.0),
+        'reserved_quantity' : float(123.0),
+    }]))
 
 #update_stock_value()
 #display_specific_product("tester")
 #display_all()
 #Show_all_in_stock()
-test_create_quant_3()
-
-product_quantity = (models.execute_kw(db, uid, password, 'stock.quant', 'search_read',
-            [], ))
-
-#for product in product_quantity:
-#    print (product)
+#test_create_quant_3()

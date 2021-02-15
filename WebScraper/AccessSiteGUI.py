@@ -2,6 +2,7 @@ import random
 import wx
 import os
 from AccessSite import SiteActions
+import wx.grid as gridlib
 
 class InterfaceScraper(wx.Panel):
     """Class holding all GUI info for AccessSite.py.
@@ -93,11 +94,40 @@ class InterfaceOdoo(wx.Panel):
     def __init__(self, parent):
         """"""
         wx.Panel.__init__(self, parent=parent)
-        self.SetBackgroundColour("gray")
+        self.SetBackgroundColour("#F5F5F5")
+        self.odoo_access_page()
+    
+    def odoo_access_page(self):
+        #Elements to be used in GUI created
+        heading = wx.StaticText(self, id = 1, label = "Inventory Access", style = wx.ALIGN_CENTER)
+        product_grid_label = wx.StaticText(self, id = 1, label = "Product Details", style = wx.ALIGN_CENTER)
+        self.inventory_list = gridlib.Grid(self)
+        self.inventory_list.CreateGrid(5,5)
 
-        file_to_scrape__button = wx.Button(self, label="Press MeOdoo")
+        self.product_name = wx.TextCtrl(self)
+        self.search_intput_button = wx.Button(self, label="search")
+
+        self.inventory_list.SetColLabelValue(0, "Stock Code")
+        self.inventory_list.SetColLabelValue(1, "Description")
+        self.inventory_list.SetColLabelValue(2, "List Price")
+        self.inventory_list.SetColLabelValue(3, "Customer price")
+        self.inventory_list.SetColLabelValue(4, "Quantity")
+
+        #self.sheet_name_label = wx.StaticText(self, label = "Please provide file name to save to(.xlsx): ")
+        
+        #Formatting of font for text below
+        font = wx.Font(18, wx.DECORATIVE, wx.BOLD, wx.NORMAL)
+        heading.SetFont(font)
+
+        #Elements added to relevant sizers for layout to be readable
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(file_to_scrape__button, 0, wx.ALL, 10)
+        search_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.Add(heading, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
+        sizer.Add(product_grid_label, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)  
+        sizer.Add(self.inventory_list, 0, wx.ALL, 20)
+        search_sizer.Add(self.product_name, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
+        search_sizer.Add(self.search_intput_button, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)   
+        sizer.Add(search_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
         self.SetSizer(sizer)
 
 class MainApplication(wx.Frame):

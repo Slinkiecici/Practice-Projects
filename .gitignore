@@ -32,3 +32,4 @@ contactbook.db
 WebScraper/__pycache__/AccessSite.cpython-38.pyc
 WebScraper/__pycache__/AccessSite.cpython-38.pyc
 WebScraper/odooCredentials.txt
+WebScraper/__pycache__/OdooAccess.cpython-38.pyc

@@ -3,6 +3,10 @@ import wx
 import os
 from AccessSite import SiteActions
 import wx.grid as gridlib
+from OdooAccess import OdooActions
+import threading
+
+from threading import Thread
 
 class InterfaceScraper(wx.Panel):
     """Class holding all GUI info for AccessSite.py.
@@ -13,9 +17,10 @@ class InterfaceScraper(wx.Panel):
     def __init__(self, parent):
         """"""
         wx.Panel.__init__(self, parent=parent)
+        
         self.SetBackgroundColour("#F5F5F5")
         self.site_action = SiteActions()                                                            #Create Instance of class in AccessSite.py
-        self.scraper_page()
+        self.scraper_page()                                                                         #Initiate elements
     
     def scraper_page(self):
         #Elements to be used in GUI created
@@ -64,24 +69,17 @@ class InterfaceScraper(wx.Panel):
     def on_click_file_chooser(self, e): 
         wildcard = "Text Files (*.xlsx)|*.xlsx"                                                     #Ensure only files with .xlsx suffix is displayed
         dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "", wildcard, wx.FD_OPEN)
-        user_file_name = self.sheet_name.GetValue()
-        if len(user_file_name) > 1:
-            if user_file_name.endswith(".xlsx"):                                                    #Ensuring file extention is correct
-                print (user_file_name)
+        self.user_file_name = self.sheet_name.GetValue()
+        if len(self.user_file_name) > 1:
+            if self.user_file_name.endswith(".xlsx"):                                                    #Ensuring file extention is correct
+                print (self.user_file_name)
             else:
-                user_file_name = user_file_name + ".xlsx"
-                print (user_file_name)
+                self.user_file_name = self.user_file_name + ".xlsx"
+                print (self.user_file_name)
             if dlg.ShowModal() == wx.ID_OK:
-                paths = dlg.GetPaths()
-                for path in paths:
-                    self.file_label.SetLabel(path)
-                    self.site_action.compile_list_for_scrape(path)
-                    for named in self.site_action.failed:
-                        self.failed_parts.AppendText(str(named)+ "\n")                              #take all failed products and add them to the failed textctrl (from list in accessite)
-                    for named in self.site_action.success:
-                        self.successful_parts.AppendText(str(named)+ "\n")                          #take all successful products and add them to the successful textctrl (from list in accessite)
-            self.site_action.write_to_excel(user_file_name)
-            self.scrape_outcome_label.SetLabel("Successfully scraped product details have been saved to " + str(user_file_name))    #Final line if all else is executed successfully
+                self.paths = dlg.GetPaths()
+                t = threading.Thread(target =self.thread_func, args= self.paths)                    #starts function in thread or GUI freezes
+                wx.CallAfter(t.start)
         elif self.sheet_name_label.GetLabel() == ("PLEASE! A FILE NAME FIRST SIR!"):                #raise exception if no file name is entered
             self.sheet_name_label.SetLabel("PLEASE! YOU CAN NAME IT WHATEVER!")                     #raise exception if no file name is entered (BEING EXTRA SASS!)
         else: 
@@ -89,29 +87,40 @@ class InterfaceScraper(wx.Panel):
             self.sheet_name_label.SetLabel("PLEASE! A FILE NAME FIRST SIR!")                
         dlg.Destroy()
 
+    def thread_func(self,paths):
+        for path in self.paths:        
+            self.file_label.SetLabel(path)
+            self.site_action.compile_list_for_scrape(path)              
+        for named in self.site_action.failed:
+            self.failed_parts.AppendText(str(named)+ "\n")                              #take all failed products and add them to the failed textctrl (from list in accessite)
+        for named in self.site_action.success:
+            self.successful_parts.AppendText(str(named)+ "\n")                          #take all successful products and add them to the successful textctrl (from list in accessite)
+        self.site_action.write_to_excel(self.user_file_name)
+        self.scrape_outcome_label.SetLabel("Successfully scraped product details have been saved to " + str(self.user_file_name))    #Final line if all else is executed successfully           
+
 class InterfaceOdoo(wx.Panel):
     #----------------------------------------------------------------------
     def __init__(self, parent):
         """"""
         wx.Panel.__init__(self, parent=parent)
+        self.odoo_action = OdooActions() 
         self.SetBackgroundColour("#F5F5F5")
-        self.odoo_access_page()
-    
+        self.odoo_access_page()                                     #Initiate elements of GUI
+        self.populate_grid()
+
     def odoo_access_page(self):
         #Elements to be used in GUI created
         heading = wx.StaticText(self, id = 1, label = "Inventory Access", style = wx.ALIGN_CENTER)
         product_grid_label = wx.StaticText(self, id = 1, label = "Product Details", style = wx.ALIGN_CENTER)
         self.inventory_list = gridlib.Grid(self)
-        self.inventory_list.CreateGrid(5,5)
+        self.inventory_list.CreateGrid(3,5)
 
         self.product_name = wx.TextCtrl(self)
         self.search_intput_button = wx.Button(self, label="search")
 
         self.inventory_list.SetColLabelValue(0, "Stock Code")
         self.inventory_list.SetColLabelValue(1, "Description")
-        self.inventory_list.SetColLabelValue(2, "List Price")
-        self.inventory_list.SetColLabelValue(3, "Customer price")
-        self.inventory_list.SetColLabelValue(4, "Quantity")
+        self.inventory_list.SetColLabelValue(2, "Quantity")
 
         #self.sheet_name_label = wx.StaticText(self, label = "Please provide file name to save to(.xlsx): ")
         
@@ -129,6 +138,12 @@ class InterfaceOdoo(wx.Panel):
         search_sizer.Add(self.search_intput_button, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)   
         sizer.Add(search_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
         self.SetSizer(sizer)
+
+    def populate_grid(self):
+        """Function called at start up of program to show all products in stock"""
+        #self.odoo_action.Show_all_in_stock()
+        #product_data = (self.odoo_action.product_details)
+        #self.SetTable(product_data)
 
 class MainApplication(wx.Frame):
     """

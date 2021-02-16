@@ -11,6 +11,7 @@ class OdooActions :
         self.username = content[2]
         self.password = content[3]
         self.product_details = {}
+        self.all_product_details = {}
         common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(self.url))
         common.version()
         {
@@ -43,11 +44,10 @@ class OdooActions :
                     else: continue
 
     def display_all(self):
-        product_details =  (self.models.execute_kw(
+        self.all_product_details =  (self.models.execute_kw(
                 self.db, self.uid, self.password, 'product.product', 'search_read',
                 [],{'fields': ['code', 'qty_available', 'description']} ))
-        for product in product_details:
-            print (product)
+        return (self.all_product_details)
 
 
     def update_stock_value(self): #THis function does naaaaaaaaaaaaaaat work yet.
@@ -64,6 +64,6 @@ class OdooActions :
 odoo_action = OdooActions()
 #update_stock_value()
 #display_specific_product("tester")
-odoo_action.display_all()
+#odoo_action.display_all()
 #Show_all_in_stock()
 #test_create_quant_3()

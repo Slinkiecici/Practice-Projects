@@ -113,8 +113,9 @@ class InterfaceOdoo(wx.Panel):
         heading = wx.StaticText(self, id = 1, label = "Inventory Access", style = wx.ALIGN_CENTER)
         product_grid_label = wx.StaticText(self, id = 1, label = "Product Details", style = wx.ALIGN_CENTER)
         self.inventory_list = gridlib.Grid(self)
-        self.inventory_list.CreateGrid(3,5)
-
+        self.inventory_list.CreateGrid(1000,3)
+        self.inventory_list.SetColSize(1, 1500)
+        self.inventory_list.SetColSize(0, 110)
         self.product_name = wx.TextCtrl(self)
         self.search_intput_button = wx.Button(self, label="search")
 
@@ -133,18 +134,28 @@ class InterfaceOdoo(wx.Panel):
         search_sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(heading, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
         sizer.Add(product_grid_label, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)  
-        sizer.Add(self.inventory_list, 0, wx.ALL, 20)
         search_sizer.Add(self.product_name, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
         search_sizer.Add(self.search_intput_button, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)   
         sizer.Add(search_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
+        sizer.Add(self.inventory_list, 0, wx.CENTER, 1)
+
         self.SetSizer(sizer)
 
     def populate_grid(self):
         """Function called at start up of program to show all products in stock"""
-        #self.odoo_action.Show_all_in_stock()
-        #product_data = (self.odoo_action.product_details)
-        #self.SetTable(product_data)
-
+        
+        product_data = (self.odoo_action.display_all())
+        row_num = 1
+        for data in product_data:
+            code_name = (data['code'])
+            description = (data['description'])
+            quantity = (data['qty_available'])
+            self.inventory_list.SetCellValue(row_num,0,str(code_name))
+            self.inventory_list.SetCellValue(row_num,1,str(description))
+            self.inventory_list.SetCellValue(row_num,2,str(quantity))
+            row_num = row_num +1
+        self.inventory_list.Refresh()
+        
 class MainApplication(wx.Frame):
     """
     Frame that holds all other widgets and panels, base of application.

@@ -26,8 +26,8 @@ class InterfaceScraper(wx.Panel):
         #Elements to be used in GUI created
         self.file_to_scrape_button = wx.Button(self, label="Choose file to scrape")
         heading = wx.StaticText(self, id = 1, label = "WebScraper", style = wx.ALIGN_CENTER)
-        self.successful_parts = wx.TextCtrl(self, size = (200,100),style = wx.TE_MULTILINE | wx.TE_READONLY)
-        self.failed_parts = wx.TextCtrl(self, size = (200,100),style = wx.TE_MULTILINE | wx.TE_READONLY)
+        self.successful_parts = wx.TextCtrl(self,size = (500,300), style = wx.TE_MULTILINE | wx.TE_READONLY)
+        self.failed_parts = wx.TextCtrl(self, size = (500,300),style = wx.TE_MULTILINE | wx.TE_READONLY)
         self.sheet_name_label = wx.StaticText(self, label = "Please provide file name to save to(.xlsx): ")
         self.sheet_name = wx.TextCtrl(self)
         self.scrape_outcome_label = wx.StaticText(self, label = " ")
@@ -46,18 +46,18 @@ class InterfaceScraper(wx.Panel):
         parts_processed_sizer = wx.BoxSizer(wx.HORIZONTAL)
         sheet_sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(heading, 0, wx.CENTER, 10)
-        parts_processed_failed_sizer.Add(failed_label, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
-        parts_processed_successful_sizer.Add(success_label, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
-        parts_processed_successful_sizer.Add(self.successful_parts, 0, wx.ALL, 10)
-        parts_processed_failed_sizer.Add(self.failed_parts, 0, wx.ALL, 10)
+        parts_processed_failed_sizer.Add(failed_label, 0, wx.EXPAND | wx.RIGHT, 10)
+        parts_processed_successful_sizer.Add(success_label, 0, wx.EXPAND | wx.LEFT, 10)
+        parts_processed_successful_sizer.Add(self.successful_parts, 0, wx.EXPAND |wx.LEFT, 10)
+        parts_processed_failed_sizer.Add(self.failed_parts, 0, wx.EXPAND |wx.RIGHT, 10)
         
         
-        parts_processed_sizer.Add(parts_processed_successful_sizer, 0, wx.ALL, 10)
-        parts_processed_sizer.Add(parts_processed_failed_sizer, 0, wx.ALL, 10)
-        sheet_sizer.Add(self.sheet_name_label, 0, wx.ALL, 10)
-        sheet_sizer.Add(self.sheet_name, 0, wx.ALL, 10)
+        parts_processed_sizer.Add(parts_processed_successful_sizer, 0, wx.LEFT, 10)
+        parts_processed_sizer.Add(parts_processed_failed_sizer, 0,wx.RIGHT, 10)
+        sheet_sizer.Add(self.sheet_name_label, 0, wx.EXPAND |wx.ALL, 10)
+        sheet_sizer.Add(self.sheet_name, 0,wx.EXPAND | wx.ALL, 10)
 
-        sizer.Add(parts_processed_sizer, 0, wx.ALL, 10)
+        sizer.Add(parts_processed_sizer, 0, wx.CENTER, 1)
         sizer.Add(self.file_to_scrape_button, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
         sizer.Add(self.file_label, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)  
         sizer.Add(sheet_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
@@ -72,10 +72,9 @@ class InterfaceScraper(wx.Panel):
         self.user_file_name = self.sheet_name.GetValue()
         if len(self.user_file_name) > 1:
             if self.user_file_name.endswith(".xlsx"):                                                    #Ensuring file extention is correct
-                print (self.user_file_name)
+                pass
             else:
                 self.user_file_name = self.user_file_name + ".xlsx"
-                print (self.user_file_name)
             if dlg.ShowModal() == wx.ID_OK:
                 self.paths = dlg.GetPaths()
                 t = threading.Thread(target =self.thread_func, args= self.paths)                    #starts function in thread or GUI freezes
@@ -117,8 +116,8 @@ class InterfaceOdoo(wx.Panel):
         self.inventory_list.SetColSize(1, 1500)
         self.inventory_list.SetColSize(0, 110)
         self.product_name = wx.TextCtrl(self)
-        self.search_intput_button = wx.Button(self, label="search")
-
+        self.search_input_button = wx.Button(self, label="search")
+        self.search_input_button.Bind(wx.EVT_BUTTON, self.on_click_search)  
         self.inventory_list.SetColLabelValue(0, "Stock Code")
         self.inventory_list.SetColLabelValue(1, "Description")
         self.inventory_list.SetColLabelValue(2, "Quantity")
@@ -135,7 +134,7 @@ class InterfaceOdoo(wx.Panel):
         sizer.Add(heading, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
         sizer.Add(product_grid_label, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)  
         search_sizer.Add(self.product_name, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
-        search_sizer.Add(self.search_intput_button, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)   
+        search_sizer.Add(self.search_input_button, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)   
         sizer.Add(search_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
         sizer.Add(self.inventory_list, 0, wx.CENTER, 1)
 
@@ -155,7 +154,25 @@ class InterfaceOdoo(wx.Panel):
             self.inventory_list.SetCellValue(row_num,2,str(quantity))
             row_num = row_num +1
         self.inventory_list.Refresh()
-        
+    
+    def on_click_search(self, e):
+        rows_to_delete = self.inventory_list.GetNumberRows()
+        self.odoo_action.product_spec.clear()
+        self.inventory_list.DeleteRows(1,rows_to_delete)
+        search_name = self.product_name.GetValue()
+        product_details = (self.odoo_action.display_specific_product(search_name))
+        row_num = 0
+        for data in product_details:
+            self.inventory_list.AppendRows(1)
+            code_name = (data['code'])
+            description = (data['description'])
+            quantity = (data['qty_available'])
+            self.inventory_list.SetCellValue(row_num,0,str(code_name))
+            self.inventory_list.SetCellValue(row_num,1,str(description))
+            self.inventory_list.SetCellValue(row_num,2,str(quantity))
+            row_num = row_num +1
+        self.inventory_list.Refresh()
+
 class MainApplication(wx.Frame):
     """
     Frame that holds all other widgets and panels, base of application.

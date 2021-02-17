@@ -25,12 +25,11 @@ class SiteActions(Thread) :
         g.setup(connect_timeout=5, timeout=5)
         g.go("https://mall.industry.siemens.com/regpublic/Login.aspx?regionkey=ZA&lang=en&app=MALL&ret=https%3a%2f%2fmall.industry.siemens.com%2fgoos%2fWelcomePage.aspx%3fregionUrl%3d%252fza")
         if g.doc.text_search('Logout') == True:
-            print ("Already Logged in")            
+            pass            
         else:
             g.doc.set_input("ctl00$ContentPlaceHolder1$TextSiemensLogin", login_name )          #id used on page for input field of login name
             g.doc.set_input("ctl00$ContentPlaceHolder1$TextPassword", login_password)           #id used on page for input field of password
-            g.submit()
-            print ("Logged in")                                                                          #submits form to login
+            g.submit()                                                                       #submits form to login
         g.setup(connect_timeout=6, timeout=6)
         for part in self.parts_list:
             if (len(str(part))) < 5:

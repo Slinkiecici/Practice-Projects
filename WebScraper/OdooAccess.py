@@ -11,6 +11,7 @@ class OdooActions :
         self.username = content[2]
         self.password = content[3]
         self.product_details = {}
+        self.product_spec = []
         self.all_product_details = {}
         common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(self.url))
         common.version()
@@ -33,15 +34,16 @@ class OdooActions :
 
     def display_specific_product(self, product_name):
         product_details =  (self.models.execute_kw(
-                db, self.uid, self.password, 'product.product', 'search_read',
-                [],))
+                self.db, self.uid, self.password, 'product.product', 'search_read',
+                [], ))
         product_search = product_name
         for product in product_details:
             for key,value in product.items():
                 if key == "product_variant_id":
                     if str(product_search).capitalize() in str(value).capitalize():
-                        print (product)
+                        self.product_spec.append(product)
                     else: continue
+        return (self.product_spec)
 
     def display_all(self):
         self.all_product_details =  (self.models.execute_kw(

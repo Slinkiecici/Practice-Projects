@@ -34,7 +34,8 @@ class InterfaceScraper(wx.Panel):
         success_label = wx.StaticText(self, id = 1, label = "Successfully Scraped Products", style = wx.ALIGN_CENTER)
         failed_label = wx.StaticText(self, id = 1, label = "Unsuccessful Products", style = wx.ALIGN_CENTER)
         self.file_label = wx.StaticText(self, id = 1, label = "File name will appear here", style = wx.ALIGN_CENTER)
-        
+        self.file_to_scrape_button.SetDefault()
+
         #Formatting of font for text below
         font = wx.Font(18, wx.DECORATIVE, wx.BOLD, wx.NORMAL)
         heading.SetFont(font)
@@ -117,11 +118,12 @@ class InterfaceOdoo(wx.Panel):
         self.inventory_list.SetColSize(0, 110)
         self.product_name = wx.TextCtrl(self)
         self.search_input_button = wx.Button(self, label="search")
+        self.searching_text = wx.StaticText(self, id = 1, label = "", style = wx.ALIGN_CENTER)
         self.search_input_button.Bind(wx.EVT_BUTTON, self.on_click_search)  
         self.inventory_list.SetColLabelValue(0, "Stock Code")
         self.inventory_list.SetColLabelValue(1, "Description")
         self.inventory_list.SetColLabelValue(2, "Quantity")
-
+        self.search_input_button.SetDefault()
         #self.sheet_name_label = wx.StaticText(self, label = "Please provide file name to save to(.xlsx): ")
         
         #Formatting of font for text below
@@ -134,9 +136,10 @@ class InterfaceOdoo(wx.Panel):
         sizer.Add(heading, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
         sizer.Add(product_grid_label, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)  
         search_sizer.Add(self.product_name, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
-        search_sizer.Add(self.search_input_button, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)   
+        search_sizer.Add(self.search_input_button, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20) 
+        search_sizer.Add(self.searching_text, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)  
         sizer.Add(search_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 20)
-        sizer.Add(self.inventory_list, 0, wx.CENTER, 1)
+        sizer.Add(self.inventory_list, 0, wx.CENTER| wx.EXPAND, 1)
 
         self.SetSizer(sizer)
 
@@ -156,6 +159,14 @@ class InterfaceOdoo(wx.Panel):
         self.inventory_list.Refresh()
     
     def on_click_search(self, e):
+        self.searching_text.SetLabel("Please Wait")
+        self.searching_text.SetForegroundColour(wx.Colour(255,0,0))
+        font = wx.Font(15, wx.DECORATIVE, wx.BOLD, wx.NORMAL)
+        self.searching_text.SetFont(font)
+        t = threading.Thread(target =self.thread_search)                    #starts function in thread or GUI freezes
+        wx.CallAfter(t.start)
+
+    def thread_search(self):
         rows_to_delete = self.inventory_list.GetNumberRows()
         self.odoo_action.product_spec.clear()
         self.inventory_list.DeleteRows(1,rows_to_delete)
@@ -172,7 +183,7 @@ class InterfaceOdoo(wx.Panel):
             self.inventory_list.SetCellValue(row_num,2,str(quantity))
             row_num = row_num +1
         self.inventory_list.Refresh()
-
+        self.searching_text.SetLabel("Search Complete!")
 class MainApplication(wx.Frame):
     """
     Frame that holds all other widgets and panels, base of application.
@@ -182,8 +193,9 @@ class MainApplication(wx.Frame):
         """Constructor"""        
         wx.Frame.__init__(self, None, wx.ID_ANY, 
                           "Stock Management",
-                          size=(600,400)
+                          size=(1850,800)
                           )
+        self.Centre()
         panel = wx.Panel(self)
 
         notebook = wx.Notebook(panel)

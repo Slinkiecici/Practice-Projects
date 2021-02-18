@@ -24,18 +24,23 @@ class DatabaseForUser():
         """, (self.name_in, self.email_in, self.password_in_1))
         self.conn.commit ()
 
-    #self.cursor = self.conn.execute("SELECT ID, NAME, EMAIL, PASSSWORD")
-    #for row in self.cursor:
-    #   print ("ID = ", row[0])
-    #   print ("NAME = ", row[1])
-    #   print ("EMAIL = ", row[2])
-    #   print ("PASSWORD = ", row[3], "\n")
     def show_table(self):
         self.cursor.execute("SELECT * FROM USER")
         print (self.cursor.fetchall())
-        self.conn.close()
+
+
+    def update_user_info(self, identifier):
+        #self.cursor.execute("UPDATE USER SET name = whatever WHERE)
+        pass
+    
+    def delete_user_info(self, named):
+        delete_statement = "DELETE FROM USER WHERE  email = ?"
+        self.cursor.execute(delete_statement, (named, ))
+        self.conn.commit ()
 
 database_class = DatabaseForUser()
 database_class.get_user_info()
 database_class.insert_user_info()
 database_class.show_table()
+database_class.delete_user_info("@frog")
+database_class.conn.close()
